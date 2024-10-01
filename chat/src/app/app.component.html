@@ -1,0 +1,11 @@
+<div>
+  <input type="text" [(ngModel)]="pregunta">
+  <button (click)="loadChunkedData()">Enviar</button>
+  <br /><br />
+  <div class="container">
+    <markdown [data]="chunkedText"></markdown>
+  </div>
+  <div>Contexto: {{contexto}}</div>
+</div>
+
+<router-outlet />
