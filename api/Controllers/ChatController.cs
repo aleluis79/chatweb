@@ -18,8 +18,26 @@ namespace YourNamespace.Controllers
             _chatService = chatService;
         }
 
+        [HttpGet("models")]
+        public async Task<IActionResult> GetModels()
+        {
+            using var ollama = new OllamaApiClient();
+            var models = await ollama.Models.ListModelsAsync();
+            
+            // Armar una lista que solo tenga el nombre del modelo
+            var modelList = new List<string>();
+            if (models.Models != null) {
+                foreach (var model in models.Models) {
+                    if (model.Model1 != null) {
+                        modelList.Add(model.Model1);
+                    }
+                }
+            }
+            return Ok(modelList);
+        }
+
         [HttpGet("stream-text")]
-        public async Task<IActionResult> StreamText(string pregunta, string? contextoId)
+        public async Task<IActionResult> StreamText(string pregunta, string? contextoId, string model = "llama3.1")
         {
             Response.Headers.Append("Content-Type", "application/json");
 
@@ -39,7 +57,7 @@ namespace YourNamespace.Controllers
 
                 using var ollama = new OllamaApiClient();
 
-                var enumerable = ollama.Completions.GenerateCompletionAsync("llama3.1", pregunta, context: context );
+                var enumerable = ollama.Completions.GenerateCompletionAsync(model, pregunta, context: context );
                 await foreach (var response in enumerable)
                 {
                     //Console.Write($"{response.Response}");

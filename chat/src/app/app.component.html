@@ -1,4 +1,13 @@
+
 <div class="container-pnl">
+  <div style="width: 1000px;">
+    <select [(ngModel)]="modelSelected">
+    @for (model of models; track $index) {
+      <option>{{model}}</option>
+    }
+    </select>
+  </div>
+
   <div class="chat-container">
     <div #panelMsg class="messages-container">
       @for (message of messages; track $index) {

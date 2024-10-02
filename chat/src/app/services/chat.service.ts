@@ -1,9 +1,13 @@
-import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
+
+  http = inject(HttpClient);
 
   async fetchChunkedData(url: string, onChunkReceived: (chunk: string) => void): Promise<void> {
     const response = await fetch(url);
@@ -30,6 +34,10 @@ export class ChatService {
         onChunkReceived(chunkText);
       }
     }
+  }
+
+  getModels(): Observable<string[]> {
+    return this.http.get<string[]>('http://localhost:5000/api/chat/models')
   }
 
 }

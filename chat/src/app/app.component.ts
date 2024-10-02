@@ -4,6 +4,7 @@ import { ChatService } from './services/chat.service';
 import { FormsModule } from '@angular/forms';
 import { MarkdownModule } from 'ngx-markdown';
 import { AsyncPipe } from '@angular/common';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -28,7 +29,26 @@ export class AppComponent {
 
   messages: Message[] = [];
 
-  newMessage = '';
+  newMessage = ''
+
+  modelSelected = ''
+
+  models : string[] = []
+
+  constructor() {
+    lastValueFrom(this.chatSvc.getModels()).then(
+      (models) => {
+        this.models = models
+        if (this.models.length > 0) {
+          this.modelSelected = models[0]
+        }
+        return models
+      }
+    )
+
+  }
+
+
 
   async sendMessage() {
     if (this.newMessage.trim() !== '') {
@@ -53,7 +73,7 @@ export class AppComponent {
       this.newMessage = '';
 
       // Llamar al servicio para cargar los datos en chunks
-      await this.chatSvc.fetchChunkedData(`http://localhost:5000/api/chat/stream-text?pregunta=${message}&contextoId=${this.contextoId}`, (chunk) => {
+      await this.chatSvc.fetchChunkedData(`http://localhost:5000/api/chat/stream-text?pregunta=${message}&contextoId=${this.contextoId}&model=${this.modelSelected}`, (chunk) => {
         const aux = JSON.parse(chunk) as ChatMessage
         chunkedText += aux.Chunk;
         msg.text += aux.Chunk
