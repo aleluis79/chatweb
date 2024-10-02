@@ -1,11 +1,26 @@
-<div>
-  <input type="text" [(ngModel)]="pregunta">
-  <button (click)="loadChunkedData()">Enviar</button>
-  <br /><br />
-  <div class="container">
-    <markdown [data]="chunkedText"></markdown>
+<div class="container-pnl">
+  <div class="chat-container">
+    <div #panelMsg class="messages-container">
+      @for (message of messages; track $index) {
+        <div [className]="message.user === 'Tú' ? 'message' : 'message-bot'">
+          @if (message.user === 'Tú') {
+            <img src="user.png" width="40" height="40" />
+            <span class="user">{{ message.user }}:</span>
+          } @else {
+            <img src="robot.png" width="40" height="40" />
+            <span class="user">:{{ message.user }}</span>
+          }
+          <markdown [className]="message.user === 'Tú' ? '' : 'bot'" [data]="message.text"></markdown>
+        </div>
+      } @empty {
+        <div>No hay mensajes</div>
+      }
+    </div>
+    <div class="input-container">
+      <input autofocus [(ngModel)]="newMessage" (keydown.enter)="sendMessage()" placeholder="Escribe un mensaje..." />
+      <button (click)="sendMessage()">Enviar</button>
+      <button (click)="clear()">Limpiar</button>
+    </div>
   </div>
-  <div>Contexto: {{contexto}}</div>
 </div>
-
 <router-outlet />

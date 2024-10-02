@@ -1,5 +1,75 @@
-.container {
-  width: 800px;
-  border: solid 1px silver;
+.container-pnl {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+}
+
+.chat-container {
+  width: 1000px;
+  height: 800px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.messages-container {
+  display: flex;
+  flex-direction: column;
   padding: 10px;
+  overflow-y: auto;
+  //background-color: #f9f9f9;
+  scroll-behavior: smooth;
+}
+
+.message {
+  margin-bottom: 10px;
+}
+
+.message-bot {
+  display: flex;
+  flex-direction: row-reverse;
+  margin-bottom: 10px;
+  text-align: end;
+}
+
+.input-container {
+  display: flex;
+  padding: 10px;
+  background-color: #eee;
+  border-radius: 0 0 10px 10px;
+}
+
+markdown {
+  display: inline-block;
+  background-color: aliceblue;
+  border-radius: 10px;
+  padding: 0px 10px;
+  text-align: left;
+}
+
+markdown.bot {
+  background-color: honeydew;
+}
+
+input {
+  flex: 1;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
 }

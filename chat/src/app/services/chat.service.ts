@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ChatMessage } from '../app.component';
 
 @Injectable({
   providedIn: 'root'
