@@ -4,11 +4,11 @@
       @for (message of messages; track $index) {
         <div [className]="message.user === 'Tú' ? 'message' : 'message-bot'">
           @if (message.user === 'Tú') {
-            <img src="user.png" width="40" height="40" />
-            <span class="user">{{ message.user }}:</span>
+            <img src="user.png" class="img-avatar" width="40" height="40" />
+            <span class="name-avatar">:{{ message.user }}</span>
           } @else {
-            <img src="robot.png" width="40" height="40" />
-            <span class="user">:{{ message.user }}</span>
+            <img src="robot.png" class="img-avatar" width="40" height="40" />
+            <span class="name-avatar">{{ message.user }}:</span>
           }
           <markdown [className]="message.user === 'Tú' ? '' : 'bot'" [data]="message.text"></markdown>
         </div>
@@ -18,8 +18,8 @@
     </div>
     <div class="input-container">
       <input autofocus [(ngModel)]="newMessage" (keydown.enter)="sendMessage()" placeholder="Escribe un mensaje..." />
-      <button (click)="sendMessage()">Enviar</button>
-      <button (click)="clear()">Limpiar</button>
+      <button (click)="sendMessage()" onclick="this.parentNode.querySelector('input').focus()">Enviar</button>
+      <button class="clear" (click)="clear()" onclick="this.parentNode.querySelector('input').focus()">Limpiar</button>
     </div>
   </div>
 </div>

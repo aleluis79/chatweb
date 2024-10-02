@@ -24,14 +24,22 @@
 }
 
 .message {
+  display: flex;
+  flex-direction: row-reverse;
+  text-align: end;
   margin-bottom: 10px;
 }
 
 .message-bot {
-  display: flex;
-  flex-direction: row-reverse;
   margin-bottom: 10px;
-  text-align: end;
+}
+
+.name-avatar {
+  vertical-align: top;
+}
+
+.img-avatar {
+  vertical-align: top;
 }
 
 .input-container {
@@ -72,4 +80,12 @@ button {
 
 button:hover {
   background-color: #0056b3;
+}
+
+button.clear {
+  background-color: #dc3545;
+}
+
+button.clear:hover {
+  background-color: #bd2130;
 }
