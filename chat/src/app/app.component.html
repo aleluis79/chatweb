@@ -1,11 +1,12 @@
 
 <div class="container-pnl">
-  <div style="width: 1000px;">
+  <div class="chat-model">
     <select [(ngModel)]="modelSelected">
     @for (model of models; track $index) {
       <option>{{model}}</option>
     }
     </select>
+    Contexto: {{contextoId}}
   </div>
 
   <div class="chat-container">

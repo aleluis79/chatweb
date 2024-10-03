@@ -6,6 +6,10 @@
   margin-top: 50px;
 }
 
+.chat-model {
+  width: 1000px;
+}
+
 .chat-container {
   width: 1000px;
   height: 800px;
@@ -14,6 +18,16 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+@media (max-width: 1000px) {
+  .chat-container {
+    width: 100%;
+  }
+
+  .chat-model {
+    width: 100%;
+  }
 }
 
 .messages-container {

@@ -42,7 +42,7 @@ namespace YourNamespace.Controllers
             Response.Headers.Append("Content-Type", "application/json");
 
             pregunta = "Responde de forma resumida la pregunta: " + pregunta;
-
+            
             var writer = Response.BodyWriter;
             
             IList<long>? context = new List<long>();
