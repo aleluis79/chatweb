@@ -1,17 +1,17 @@
 
 <div class="container-pnl">
   <div class="chat-model">
-    <select [(ngModel)]="modelSelected">
-    @for (model of models; track $index) {
+    <select [(ngModel)]="modelSelected" (ngModelChange)="clear()" onchange="document.querySelector('input').focus()">
+    @for (model of models(); track $index) {
       <option>{{model}}</option>
     }
     </select>
-    Contexto: {{contextoId}}
+    Contexto: {{contextoId()}}
   </div>
 
   <div class="chat-container">
     <div #panelMsg class="messages-container">
-      @for (message of messages; track $index) {
+      @for (message of messages(); track $index) {
         <div [className]="message.user === 'Tú' ? 'message' : 'message-bot'">
           @if (message.user === 'Tú') {
             <img src="user.png" class="img-avatar" width="40" height="40" />
@@ -28,8 +28,9 @@
     </div>
     <div class="input-container">
       <input autofocus [(ngModel)]="newMessage" (keydown.enter)="sendMessage()" placeholder="Escribe un mensaje..." />
-      <button (click)="sendMessage()" onclick="this.parentNode.querySelector('input').focus()">Enviar</button>
-      <button class="clear" (click)="clear()" onclick="this.parentNode.querySelector('input').focus()">Limpiar</button>
+      <button (click)="sendMessage()" onclick="document.querySelector('input').focus()">Enviar</button>
+      <button class="stop" (click)="stop()" title="Detener la conversación" onclick="document.querySelector('input').focus()">&nbsp;</button>
+      <button class="clear" (click)="clear()" title="Borrar historial" onclick="document.querySelector('input').focus()">Limpiar</button>
     </div>
   </div>
 </div>

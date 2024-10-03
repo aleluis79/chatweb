@@ -7,9 +7,14 @@ import { Observable } from 'rxjs';
 })
 export class ChatService {
 
+  #URL_API = 'http://localhost:5000/api/chat'
+
   http = inject(HttpClient);
 
-  async fetchChunkedData(url: string, onChunkReceived: (chunk: string) => void): Promise<void> {
+  async fetchChunkedData(message: string, contextoId: string, modelSelected: string, onChunkReceived: (chunk: string) => void): Promise<void> {
+
+    const url = `${this.#URL_API}/stream-text?pregunta=${message}&contextoId=${contextoId}&model=${modelSelected}`
+
     const response = await fetch(url);
 
     if (!response.body) {
@@ -37,7 +42,12 @@ export class ChatService {
   }
 
   getModels(): Observable<string[]> {
-    return this.http.get<string[]>('http://localhost:5000/api/chat/models')
+    return this.http.get<string[]>(`${this.#URL_API}/models`)
   }
+
+  cancel(contextoId: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.#URL_API}/cancel?contextoId=${contextoId}`)
+  }
+
 
 }

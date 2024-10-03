@@ -41,23 +41,28 @@ namespace YourNamespace.Controllers
         {
             Response.Headers.Append("Content-Type", "application/json");
 
-            pregunta = "Responde de forma resumida la pregunta: " + pregunta;
+            //pregunta = "Responde de forma resumida la pregunta: " + pregunta;
             
             var writer = Response.BodyWriter;
             
             IList<long>? context = new List<long>();
             if (!String.IsNullOrEmpty(contextoId)) {
-                context = this._chatService.GetContext(Guid.Parse(contextoId));
+                if (_chatService.GetContext(Guid.Parse(contextoId)) != null) {
+                    context = this._chatService.GetContext(Guid.Parse(contextoId));
+                }
             } else {
                 contextoId = Guid.NewGuid().ToString();
             }
 
             try
             {
-
                 using var ollama = new OllamaApiClient();
 
-                var enumerable = ollama.Completions.GenerateCompletionAsync(model, pregunta, context: context );
+                var cancellationTokenSource = new CancellationTokenSource();
+                var cancellationToken = cancellationTokenSource.Token;
+                _chatService.AddToken(Guid.Parse(contextoId), cancellationTokenSource);
+
+                var enumerable = ollama.Completions.GenerateCompletionAsync(model, pregunta, context: context, cancellationToken: cancellationToken);
                 await foreach (var response in enumerable)
                 {
                     //Console.Write($"{response.Response}");
@@ -93,7 +98,15 @@ namespace YourNamespace.Controllers
             return new EmptyResult();
         }
 
+
+        [HttpGet("cancel")]
+        public IActionResult Cancel(string contextoId) {
+            _chatService.CancelToken(Guid.Parse(contextoId));
+            return Ok(true);
+        }
+
     }
+    
     
 }
 
