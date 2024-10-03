@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal, effect, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, viewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ChatService } from './services/chat.service';
 import { FormsModule } from '@angular/forms';
 import { MarkdownModule } from 'ngx-markdown';
 import { AsyncPipe } from '@angular/common';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { firstValueFrom, take, takeLast, tap } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom, take, tap } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -41,6 +41,10 @@ export class AppComponent {
 
   newMessage = signal('')
 
+  systemPrompt = signal('')
+
+  showSystemPrompt = signal(false)
+
   async sendMessage() {
     if (this.newMessage().trim() !== '') {
 
@@ -64,25 +68,31 @@ export class AppComponent {
       this.newMessage.set('');
 
       // Llamar al servicio para cargar los datos en chunks
-      await this.chatSvc.fetchChunkedData(message, this.contextoId(), this.modelSelected(), (chunk) => {
-        const aux = JSON.parse(chunk) as ChatMessage
-        chunkedText += aux.Chunk;
+      await this.chatSvc.fetchChunkedData(message, this.contextoId(), this.modelSelected(), this.systemPrompt(), (chunk) => {
+        try {
+          const aux = JSON.parse(chunk) as ChatMessage
+          chunkedText += aux.Chunk;
 
-        this.messages.update(messages => [...messages.slice(0, messages.length - 1), { user: 'Bot', text: chunkedText }]);
+          this.messages.update(messages => [...messages.slice(0, messages.length - 1), { user: 'Bot', text: chunkedText }]);
 
-        if (aux.ContextId) {
-          this.contextoId.set(aux.ContextId)
+          if (aux.ContextId) {
+            this.contextoId.set(aux.ContextId)
+          }
+        } catch (error) {
+          console.log("Falló al parsear", error)
         }
         (this.panelMsg() as any).nativeElement.scrollTop = (this.panelMsg() as any).nativeElement.scrollHeight;
       }).catch(error => {
-        console.log("Pedido cancelado")
+        console.log("Pedido cancelado", error)
       });
 
     }
   }
 
   stop() {
-    firstValueFrom(this.chatSvc.cancel(this.contextoId())).then(() => {})
+    if (this.contextoId() !== '') {
+      firstValueFrom(this.chatSvc.cancel(this.contextoId())).then(() => {})
+    }
   }
 
   clear() {

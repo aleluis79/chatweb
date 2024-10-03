@@ -27,10 +27,16 @@
       }
     </div>
     <div class="input-container">
-      <input autofocus [(ngModel)]="newMessage" (keydown.enter)="sendMessage()" placeholder="Escribe un mensaje..." />
-      <button (click)="sendMessage()" onclick="document.querySelector('input').focus()">Enviar</button>
-      <button class="stop" (click)="stop()" title="Detener la conversación" onclick="document.querySelector('input').focus()">&nbsp;</button>
-      <button class="clear" (click)="clear()" title="Borrar historial" onclick="document.querySelector('input').focus()">Limpiar</button>
+      <div class="system-prompt" [class.oculto]="!showSystemPrompt()">
+        <input [(ngModel)]="systemPrompt" placeholder="Prompt del sistema..." />
+      </div>
+      <div>
+        <input id="prompt" autofocus [(ngModel)]="newMessage" (keydown.enter)="sendMessage()" placeholder="Escribe un mensaje..." />
+        <button (click)="sendMessage()" onclick="document.querySelector('#prompt').focus()">Enviar</button>
+        <button (click)="showSystemPrompt.set(!showSystemPrompt())" title="Configuraciones">⚙️</button>
+        <button class="stop" (click)="stop()" title="Detener la conversación" onclick="document.querySelector('#prompt').focus()">✋</button>
+        <button class="clear" (click)="clear()" title="Borrar historial" onclick="document.querySelector('#prompt').focus()">Limpiar</button>
+      </div>
     </div>
   </div>
 </div>

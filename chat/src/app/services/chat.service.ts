@@ -11,9 +11,9 @@ export class ChatService {
 
   http = inject(HttpClient);
 
-  async fetchChunkedData(message: string, contextoId: string, modelSelected: string, onChunkReceived: (chunk: string) => void): Promise<void> {
+  async fetchChunkedData(message: string, contextoId: string, modelSelected: string, systemPrompt: string, onChunkReceived: (chunk: string) => void): Promise<void> {
 
-    const url = `${this.#URL_API}/stream-text?pregunta=${message}&contextoId=${contextoId}&model=${modelSelected}`
+    const url = `${this.#URL_API}/stream-text?pregunta=${message}&contextoId=${contextoId}&model=${modelSelected}&systemPrompt=${systemPrompt}`
 
     const response = await fetch(url);
 

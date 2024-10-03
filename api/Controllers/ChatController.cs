@@ -3,6 +3,7 @@ using System.Text;
 using Ollama;
 using System.Text.Json;
 using api.Services;
+using api.Models;
 
 namespace YourNamespace.Controllers
 {
@@ -37,36 +38,44 @@ namespace YourNamespace.Controllers
         }
 
         [HttpGet("stream-text")]
-        public async Task<IActionResult> StreamText(string pregunta, string? contextoId, string model = "llama3.1")
+        public async Task<IActionResult> StreamText(string pregunta, string? contextoId, string model = "llama3.1", string? systemPrompt = null)
         {
             Response.Headers.Append("Content-Type", "application/json");
+
+            if (systemPrompt != null) {
+                pregunta = systemPrompt + "\n" + pregunta;
+            }
 
             //pregunta = "Responde de forma resumida la pregunta: " + pregunta;
             
             var writer = Response.BodyWriter;
             
-            IList<long>? context = new List<long>();
-            if (!String.IsNullOrEmpty(contextoId)) {
-                if (_chatService.GetContext(Guid.Parse(contextoId)) != null) {
-                    context = this._chatService.GetContext(Guid.Parse(contextoId));
-                }
-            } else {
+            Conversation? conversation;
+
+            if (String.IsNullOrEmpty(contextoId)) {
                 contextoId = Guid.NewGuid().ToString();
+                conversation = _chatService.CreateConversation(Guid.Parse(contextoId));
+            } else {
+                conversation = _chatService.GetConversation(Guid.Parse(contextoId));
+                if (conversation == null) {
+                    await writer.CompleteAsync();
+                    Console.WriteLine($"Conversation not found: {contextoId}");
+                    return new EmptyResult();
+                }
             }
+
+            conversation.tokenSource = new CancellationTokenSource();
 
             try
             {
                 using var ollama = new OllamaApiClient();
 
-                var cancellationTokenSource = new CancellationTokenSource();
-                var cancellationToken = cancellationTokenSource.Token;
-                _chatService.AddToken(Guid.Parse(contextoId), cancellationTokenSource);
 
-                var enumerable = ollama.Completions.GenerateCompletionAsync(model, pregunta, context: context, cancellationToken: cancellationToken);
+                var enumerable = ollama.Completions.GenerateCompletionAsync(model, pregunta, context: conversation.Context, cancellationToken: conversation.tokenSource.Token);
                 await foreach (var response in enumerable)
                 {
                     //Console.Write($"{response.Response}");
-                    context = response.Context;
+                    var context = response.Context;
 
                     if (context != null)
                     {
@@ -108,11 +117,4 @@ namespace YourNamespace.Controllers
     }
     
     
-}
-
-
-public class ResponseData
-{
-    public string ContextId { get; set; } = string.Empty;
-    public string Chunk { get; set; } = string.Empty;
 }

@@ -60,9 +60,15 @@
 
 .input-container {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
   padding: 10px;
   background-color: #eee;
   border-radius: 0 0 10px 10px;
+
+  div {
+    display: flex;
+  }
 }
 
 markdown {
@@ -107,12 +113,19 @@ button.clear:hover {
 }
 
 button.stop {
-  border-radius: 50%;
-  width: 25px;
-  height: 25px;
   background-color: #dc3545;
 }
 
 button.stop:hover {
   background-color: #bd2130;
+}
+
+.system-prompt {
+  height: 30px;
+  transition: all 0.1s linear;
+}
+
+.oculto {
+  height: 0;
+  overflow: hidden;
 }
