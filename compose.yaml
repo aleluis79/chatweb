@@ -17,6 +17,13 @@ services:
     volumes:
         - ./ollama:/root/.ollama
         - ./entrypoint.sh:/entrypoint.sh
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     pull_policy: always
     tty: true
     restart: always
