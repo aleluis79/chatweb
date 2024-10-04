@@ -5,13 +5,17 @@
 
 ![image info](./assets/chat.png)
 
+## Correr con Docker Compose
+
+docker compose up -d
+
 ## Correr Ollama con Docker
 
 docker run -d --gpus=all -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
 
 ## Descargar el modelo llama3.1
 
-docker exec -it ollama pull llama3.1
+docker exec -it ollama pull llama3.2
 
 ## Ejecutar la API
 

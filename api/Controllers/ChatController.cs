@@ -14,6 +14,9 @@ namespace YourNamespace.Controllers
 
         private readonly IChatService _chatService;
 
+        //private readonly static Uri BASE_URI = new Uri("http://ollama-svc:11434/api");
+        private readonly static Uri BASE_URI = new Uri($"http://{Environment.GetEnvironmentVariable("HOST_OLLAMA")}:11434/api");
+        
         public ChatController(IChatService chatService)
         {
             _chatService = chatService;
@@ -22,7 +25,7 @@ namespace YourNamespace.Controllers
         [HttpGet("models")]
         public async Task<IActionResult> GetModels()
         {
-            using var ollama = new OllamaApiClient();
+            using var ollama = new OllamaApiClient(null, BASE_URI);
             var models = await ollama.Models.ListModelsAsync();
             
             // Armar una lista que solo tenga el nombre del modelo
@@ -68,7 +71,7 @@ namespace YourNamespace.Controllers
 
             try
             {
-                using var ollama = new OllamaApiClient();
+                using var ollama = new OllamaApiClient(null, BASE_URI);
 
 
                 var enumerable = ollama.Completions.GenerateCompletionAsync(model, pregunta, context: conversation.Context, cancellationToken: conversation.tokenSource.Token);
