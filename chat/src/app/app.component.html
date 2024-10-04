@@ -20,7 +20,12 @@
             <img src="robot.png" class="img-avatar" width="40" height="40" />
             <span class="name-avatar">{{ message.user }}:</span>
           }
-          <markdown [className]="message.user === 'Tú' ? '' : 'bot'" [data]="message.text"></markdown>
+          <markdown
+            clipboard
+            lineNumbers
+            [className]="message.user === 'Tú' ? '' : 'bot'"
+            [data]="message.text">
+          </markdown>
         </div>
       } @empty {
         <div>No hay mensajes</div>
