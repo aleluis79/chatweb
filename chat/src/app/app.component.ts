@@ -33,7 +33,16 @@ export class AppComponent {
 
   models = toSignal(
     this.chatSvc.getModels().pipe(
-      tap(models => this.modelSelected.set(models[models.length - 1]))
+      //tap(models => this.modelSelected.set(models[models.length - 1]))
+      tap(models => {
+        var modelSelected = localStorage.getItem('modelSelected')
+        if (modelSelected) {
+          this.modelSelected.set(modelSelected)
+        } else {
+          localStorage.setItem('modelSelected', models[models.length - 1])
+          this.modelSelected.set(models[models.length - 1])
+        }
+      })
     ), { initialValue: [] }
   )
 
@@ -111,7 +120,13 @@ export class AppComponent {
     }
   }
 
+  changeModel() {
+    localStorage.setItem('modelSelected', this.modelSelected())
+    this.clear();
+  }
+
 }
+
 
 export interface ChatMessage {
   ContextId: string

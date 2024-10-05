@@ -26,3 +26,9 @@ html {
   content: 'Copiado!';
   visibility: visible;
 }
+
+div.code-toolbar > .toolbar {
+  top: -2px !important;
+  left:2px !important;
+  width: 300px !important;
+}

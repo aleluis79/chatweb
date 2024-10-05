@@ -1,7 +1,7 @@
 
 <div class="container-pnl">
   <div class="chat-model">
-    <select [(ngModel)]="modelSelected" (ngModelChange)="clear()" onchange="document.querySelector('input').focus()">
+    <select [(ngModel)]="modelSelected" (ngModelChange)="changeModel()" onchange="document.querySelector('input').focus()">
     @for (model of models(); track $index) {
       <option>{{model}}</option>
     }
