@@ -31,6 +31,8 @@ export class AppComponent {
 
   modelSelected = signal('')
 
+  darkMode = signal(false)
+
   models = toSignal(
     this.chatSvc.getModels().pipe(
       //tap(models => this.modelSelected.set(models[models.length - 1]))
@@ -53,6 +55,29 @@ export class AppComponent {
   systemPrompt = signal('')
 
   showSystemPrompt = signal(false)
+
+  constructor() {
+    const body = document.getElementsByTagName('body')[0];
+    if (localStorage.getItem('darkMode') === 'true') {
+      body.classList.add('dark-mode');
+      this.darkMode.set(true);
+    } else {
+      this.darkMode.set(false);
+    }
+  }
+
+  changeDarkLightMode() {
+    const body = document.getElementsByTagName('body')[0];
+    if (body.classList.contains('dark-mode')) {
+      body.classList.remove('dark-mode');
+      localStorage.setItem('darkMode', 'false');
+      this.darkMode.set(false);
+    } else {
+      body.classList.add('dark-mode');
+      localStorage.setItem('darkMode', 'true');
+      this.darkMode.set(true);
+    }
+  }
 
   async sendMessage() {
     if (this.newMessage().trim() !== '') {
