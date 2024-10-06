@@ -17,6 +17,11 @@
             <span class="name-avatar">:{{ message.user }}</span>
           } @else {
             <img src="robot.png" class="img-avatar" width="40" height="40" />
+            @if (textToSpeechSvc.speaking()) {
+              <a href="javascript:void(0);" (click)="textToSpeechSvc.stop()">🔇</a>
+            } @else {
+              <a href="javascript:void(0);" (click)="textToSpeechSvc.speak(message.text)" >🔈</a>
+            }
             <span class="name-avatar">{{ message.user }}:</span>
           }
           <markdown

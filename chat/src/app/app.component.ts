@@ -6,6 +6,7 @@ import { MarkdownModule } from 'ngx-markdown';
 import { AsyncPipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom, take, tap } from 'rxjs';
+import { TextToSpeechService } from './services/text-to-speech.service';
 
 @Component({
   selector: 'app-root',
@@ -24,6 +25,8 @@ export class AppComponent {
   title = 'chat'
 
   chatSvc = inject(ChatService)
+
+  textToSpeechSvc = inject(TextToSpeechService)
 
   panelMsg = viewChild('panelMsg')
 

@@ -10,6 +10,13 @@ body {
   padding: 0;
 }
 
+a {
+  display: inline-block;
+  text-decoration: none;
+  min-width: 25px;
+  vertical-align: top;
+}
+
 .dark-mode {
   background-color: var(--dark-background-color);
   color: var(--dark-color);
