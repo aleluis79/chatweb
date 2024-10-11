@@ -4,6 +4,8 @@ public class Conversation
 {
     public IList<long> Context { get; set; } = new List<long>();
 
-    public CancellationTokenSource? tokenSource { get; set; }
+    public CancellationTokenSource? TokenSource { get; set; }
+
+    public string Adjunto { get; set; } = string.Empty;
 
 }

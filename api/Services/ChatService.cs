@@ -38,8 +38,8 @@ public class ChatService : IChatService
 
     public void CancelToken(Guid contextId)
     {
-        if (_conversations.ContainsKey(contextId) && _conversations[contextId].tokenSource != null) {
-            _conversations[contextId].tokenSource?.Cancel();
+        if (_conversations.ContainsKey(contextId) && _conversations[contextId].TokenSource != null) {
+            _conversations[contextId].TokenSource?.Cancel();
         }
 
     }

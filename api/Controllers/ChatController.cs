@@ -4,6 +4,9 @@ using Ollama;
 using System.Text.Json;
 using api.Services;
 using api.Models;
+using System.Net.Http.Headers;
+using UglyToad.PdfPig;
+using UglyToad.PdfPig.Content;
 
 namespace YourNamespace.Controllers
 {
@@ -40,14 +43,54 @@ namespace YourNamespace.Controllers
             return Ok(modelList);
         }
 
+        // Upload file
+        [HttpPost("upload")]
+        public IActionResult UploadFile(string? contextoId, IFormFile? file) {
+
+            Conversation? conversation;
+
+            if (String.IsNullOrEmpty(contextoId)) {
+                contextoId = Guid.NewGuid().ToString();
+                conversation = _chatService.CreateConversation(Guid.Parse(contextoId));
+            } else {
+                conversation = _chatService.GetConversation(Guid.Parse(contextoId));
+                if (conversation == null) {
+                    Console.WriteLine($"Conversation not found: {contextoId}");
+                    return Problem("Error al subir el archivo");
+                }
+            }
+
+            if(file != null && file.Length > 0)
+            {
+                // El archivo es un pdf?
+                if (file.ContentType == "application/pdf") {
+                    var texto = "";
+                   
+                    using (PdfDocument document = PdfDocument.Open(file.OpenReadStream()))
+                    {
+                        foreach (Page page in document.GetPages())
+                        {
+                            texto += page.Text;
+                        }
+                    }
+
+                    conversation.Adjunto = texto;
+
+                    return Ok(contextoId);
+                }
+
+            } else {
+                conversation.Adjunto = string.Empty;
+                conversation.Context = new List<long>();
+            }
+        
+            return Ok();
+        }
+
         [HttpGet("stream-text")]
         public async Task<IActionResult> StreamText(string pregunta, string? contextoId, string model = "llama3.1", string? systemPrompt = null)
         {
             Response.Headers.Append("Content-Type", "application/json");
-
-            if (systemPrompt != null) {
-                pregunta = systemPrompt + "\n" + pregunta;
-            }
 
             //pregunta = "Responde de forma resumida la pregunta: " + pregunta;
             
@@ -67,14 +110,34 @@ namespace YourNamespace.Controllers
                 }
             }
 
-            conversation.tokenSource = new CancellationTokenSource();
+            conversation.TokenSource = new CancellationTokenSource();
+
+            if (!String.IsNullOrEmpty(conversation.Adjunto)) {
+                pregunta = $"""
+                    Usa las siguientes piezas de contexto para responder la pregunta que está al final.
+                    Si la pregunta no está en el contexto sólo responde que no lo sabes, no intentes responderla.
+                    Responde lo más breve posible.
+
+                    Contexto: {conversation.Adjunto}
+
+                    Pregunta: {pregunta}
+
+                    Respuesta útil:
+                    """;
+                conversation.Context = new List<long>();
+            }
+
+            if (systemPrompt != null) {
+                pregunta = systemPrompt + "\n" + pregunta;
+            }
+
 
             try
             {
                 using var ollama = new OllamaApiClient(null, BASE_URI);
 
 
-                var enumerable = ollama.Completions.GenerateCompletionAsync(model, pregunta, context: conversation.Context, cancellationToken: conversation.tokenSource.Token);
+                var enumerable = ollama.Completions.GenerateCompletionAsync(model, pregunta, context: conversation.Context, cancellationToken: conversation.TokenSource.Token);
                 await foreach (var response in enumerable)
                 {
                     //Console.Write($"{response.Response}");

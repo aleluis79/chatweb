@@ -49,5 +49,11 @@ export class ChatService {
     return this.http.get<boolean>(`${this.#URL_API}/cancel?contextoId=${contextoId}`)
   }
 
+  uploadFile(contextoId: string, file: File): Observable<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<string>(`${this.#URL_API}/upload?contextoId=${contextoId}`, formData, { responseType: 'text' as 'json' });
+  }
+
 
 }

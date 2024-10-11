@@ -36,6 +36,8 @@ export class AppComponent {
 
   darkMode = signal(false)
 
+  adjunto = signal<File | undefined>(undefined)
+
   models = toSignal(
     this.chatSvc.getModels().pipe(
       //tap(models => this.modelSelected.set(models[models.length - 1]))
@@ -140,17 +142,29 @@ export class AppComponent {
         this.messages.set([])
         this.newMessage.set('')
         this.contextoId.set('')
+        this.adjunto.set(undefined)
       })
     } else {
       this.messages.set([])
       this.newMessage.set('')
       this.contextoId.set('')
+      this.adjunto.set(undefined)
     }
+    (document.querySelector('input[type=file]') as any).value=''
+
   }
 
   changeModel() {
     localStorage.setItem('modelSelected', this.modelSelected())
     this.clear();
+  }
+
+  onFileSelected(event: any) {
+    const file: File = event.target.files[0];
+      this.chatSvc.uploadFile(this.contextoId(), file).subscribe(rta => {
+        console.log("Respuesta: ", rta)
+        this.contextoId.set(rta)
+      })
   }
 
 }

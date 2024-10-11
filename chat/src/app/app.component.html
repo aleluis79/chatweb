@@ -40,6 +40,9 @@
         <input [class.dark]="darkMode()" [(ngModel)]="systemPrompt" placeholder="Prompt del sistema..." />
         <button (click)="changeDarkLightMode()" title="Día/Noche">🌞🌒</button>
       </div>
+      <div class="adjunto" [class.oculto]="!showSystemPrompt()">
+        <input [class.dark]="darkMode()" type="file" (change)="onFileSelected($event)" placeholder="Subir archivo..." />
+      </div>
       <div>
         <input id="prompt" [class.dark]="darkMode()" autofocus [(ngModel)]="newMessage" (keydown.enter)="sendMessage()" placeholder="Escribe un mensaje..." />
         <button (click)="sendMessage()" onclick="document.querySelector('#prompt').focus()">Enviar</button>
