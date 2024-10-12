@@ -2,7 +2,7 @@ namespace api.Models;
 
 public class Conversation
 {
-    public IList<long> Context { get; set; } = new List<long>();
+    public long[] Context { get; set; } = [];
 
     public CancellationTokenSource? TokenSource { get; set; }
 

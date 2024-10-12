@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
-using Ollama;
 using System.Text.Json;
 using api.Services;
 using api.Models;
-using System.Net.Http.Headers;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
+using OllamaSharp;
+using OllamaSharp.Models;
 
-namespace YourNamespace.Controllers
+namespace api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -28,15 +28,15 @@ namespace YourNamespace.Controllers
         [HttpGet("models")]
         public async Task<IActionResult> GetModels()
         {
-            using var ollama = new OllamaApiClient(null, BASE_URI);
-            var models = await ollama.Models.ListModelsAsync();
+            var ollama = new OllamaApiClient(BASE_URI);
+            var models = await ollama.ListLocalModels();
             
             // Armar una lista que solo tenga el nombre del modelo
             var modelList = new List<string>();
-            if (models.Models != null) {
-                foreach (var model in models.Models) {
-                    if (model.Model1 != null) {
-                        modelList.Add(model.Model1);
+            if (models != null) {
+                foreach (var model in models) {
+                    if (model.Name != null) {
+                        modelList.Add(model.Name);
                     }
                 }
             }
@@ -47,17 +47,14 @@ namespace YourNamespace.Controllers
         [HttpPost("upload")]
         public IActionResult UploadFile(string? contextoId, IFormFile? file) {
 
-            Conversation? conversation;
-
             if (String.IsNullOrEmpty(contextoId)) {
                 contextoId = Guid.NewGuid().ToString();
-                conversation = _chatService.CreateConversation(Guid.Parse(contextoId));
-            } else {
-                conversation = _chatService.GetConversation(Guid.Parse(contextoId));
-                if (conversation == null) {
-                    Console.WriteLine($"Conversation not found: {contextoId}");
-                    return Problem("Error al subir el archivo");
-                }
+            }
+            
+            var conversation = _chatService.GetConversation(Guid.Parse(contextoId));
+            if (conversation == null) {
+                Console.WriteLine($"Conversation not found: {contextoId}");
+                return Problem("Error al subir el archivo");
             }
 
             if(file != null && file.Length > 0)
@@ -81,7 +78,7 @@ namespace YourNamespace.Controllers
 
             } else {
                 conversation.Adjunto = string.Empty;
-                conversation.Context = new List<long>();
+                conversation.Context = [];
             }
         
             return Ok();
@@ -96,18 +93,16 @@ namespace YourNamespace.Controllers
             
             var writer = Response.BodyWriter;
             
-            Conversation? conversation;
-
             if (String.IsNullOrEmpty(contextoId)) {
                 contextoId = Guid.NewGuid().ToString();
-                conversation = _chatService.CreateConversation(Guid.Parse(contextoId));
-            } else {
-                conversation = _chatService.GetConversation(Guid.Parse(contextoId));
-                if (conversation == null) {
-                    await writer.CompleteAsync();
-                    Console.WriteLine($"Conversation not found: {contextoId}");
-                    return new EmptyResult();
-                }
+            }
+
+            var conversation = _chatService.GetConversation(Guid.Parse(contextoId));
+
+            if (conversation == null) {
+                await writer.CompleteAsync();
+                Console.WriteLine($"Conversation not found: {contextoId}");
+                return new EmptyResult();
             }
 
             conversation.TokenSource = new CancellationTokenSource();
@@ -124,7 +119,7 @@ namespace YourNamespace.Controllers
 
                     Respuesta útil:
                     """;
-                conversation.Context = new List<long>();
+                conversation.Context = [];
             }
 
             if (systemPrompt != null) {
@@ -134,32 +129,36 @@ namespace YourNamespace.Controllers
 
             try
             {
-                using var ollama = new OllamaApiClient(null, BASE_URI);
+                var ollama = new OllamaApiClient(BASE_URI);
 
-
-                var enumerable = ollama.Completions.GenerateCompletionAsync(model, pregunta, context: conversation.Context, cancellationToken: conversation.TokenSource.Token);
-                await foreach (var response in enumerable)
-                {
-                    //Console.Write($"{response.Response}");
-                    var context = response.Context;
-
-                    if (context != null)
-                    {
-                        _chatService.AddContext(Guid.Parse(contextoId), context);
-                    }
+                var request = new GenerateRequest {
+                    Options = new RequestOptions {
+                        Temperature = 0.5f
+                    },
+                    Prompt = pregunta,
+                    Context = conversation.Context,
+                    Model = model
+                };
+                
+                await foreach (var stream in ollama.Generate(request, cancellationToken: conversation.TokenSource.Token)) {
 
                     var responseData = new ResponseData
                     {
                         ContextId = contextoId,
-                        Chunk = response.Response!
+                        Chunk = stream!.Response
                     };
 
                     string jsonResponse = JsonSerializer.Serialize(responseData);
                     byte[] responseBytes = Encoding.UTF8.GetBytes(jsonResponse);
 
+                    if (stream.Done) {
+                        conversation.Context = (stream as GenerateDoneResponseStream)!.Context;
+                    }
+
                     await writer.WriteAsync(responseBytes);
 
                 }
+
             }
             catch (Exception ex)
             {
